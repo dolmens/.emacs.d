@@ -1,0 +1,10 @@
+*
+!README.md
+!.gitignore
+!init.el
+!site-lisp/
+!site-lisp/*
+!lisp/
+!lisp/*
+!eshell/
+!eshell/alias
