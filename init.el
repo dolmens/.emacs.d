@@ -38,6 +38,8 @@
 (let ((default-directory  "~/.emacs.d/site-lisp/"))
 	(normal-top-level-add-subdirs-to-load-path))
 
+(require 'init-basic)
+
 (require 'init-ui)
 
 ;; essential packages
