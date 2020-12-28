@@ -1,3 +1,12 @@
+;;; init-misc.el --- All other misc configurations.	-*- lexical-binding: t -*-
+
+;;; Commentary:
+;;
+;; Emacs All other misc configurations.
+;;
+
+;;; Code:
+
 ;; welcome board
 (use-package dashboard
   :ensure t
@@ -54,20 +63,6 @@
 ;; command history
 (use-package amx
   :ensure t
-  )
-
-;; interactive do 
-(use-package ido
-  :ensure t
-  :config
-  (setq ido-enable-prefix nil
-  	ido-enable-flex-matching t
-  	ido-create-new-buffer 'always
-        ido-use-filename-at-point 'guess
-  	ido-max-prospects 10
-  	ido-default-file-method 'selected-window
-  	ido-auto-merge-work-directories-length nil)
-  (ido-mode t)
   )
 
 (use-package which-key
@@ -226,4 +221,7 @@
   :config
   (setq ws-butler-convert-leading-tabs-or-spaces t))
 
-(provide 'init-common-packages)
+(provide 'init-misc)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; init-misc.el ends here

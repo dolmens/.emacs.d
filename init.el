@@ -16,22 +16,20 @@
 
 (require 'init-basic)
 
+;; basic ui settings
 (require 'init-ui)
 
-;; essential packages
-(require 'init-common-packages)
-
 ;; function & commands
-(require 'init-common-functions)
-
-;; common editor settings
-(require 'init-common)
-
-;; the best editor for ever
-;; (require 'init-evil)
+(require 'init-funcs)
 
 ;; ivy and other package from abo
 (require 'init-ivy)
+
+;; all misc
+(require 'init-misc)
+
+;; the best editor for ever
+;; (require 'init-evil)
 
 (require 'init-magit)
 
