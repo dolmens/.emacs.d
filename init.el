@@ -4,39 +4,15 @@
 
 ;;; Code:
 
-;; Package setup
-(require 'package)
-
-;; Package Manager Settings
-;;
-;; add MELPA to the package archive
-(add-to-list 'package-archives
-	     '("melpa" . "https://melpa.org/packages/") t)
-
- 
-(package-initialize)
-
-;; update the package metadata when missing
-(unless package-archive-contents
-  (package-refresh-contents))
-
-;; install use-package - https://github.com/jwiegley/use-package
-(unless (package-installed-p 'use-package)
-  (package-install 'use-package))
-
-(require 'use-package)
-(setq use-package-verbose t)
-
-(use-package auto-package-update :ensure t)
+;; Package load path
+(add-to-list 'load-path (expand-file-name "lisp" user-emacs-directory))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; submodules ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(add-to-list 'load-path (expand-file-name "lisp" user-emacs-directory))
-
-(let ((default-directory  "~/.emacs.d/site-lisp/"))
-	(normal-top-level-add-subdirs-to-load-path))
+;; Package settings, mainly use-package
+(require 'init-package)
 
 (require 'init-basic)
 
