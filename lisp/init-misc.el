@@ -31,13 +31,19 @@
 
 ;; project manager
 (use-package projectile
-  :ensure t
+  :init
+  (setq projectile-switch-project-action #'projectile-dired)
+  :config
+  (projectile-mode)
   :bind-keymap
   ("C-c p" . projectile-command-map)
-  :config
-  (projectile-mode +1)
   :bind (("C-c f" . projectile-find-file))
   )
+
+(use-package counsel-projectile
+  :diminish counsel-projectile-mode
+  :config
+  (counsel-projectile-mode))
 
 (use-package treemacs
 	:ensure t
@@ -220,6 +226,9 @@
   (add-hook 'org-mode-hook #'ws-butler-mode)
   :config
   (setq ws-butler-convert-leading-tabs-or-spaces t))
+
+(use-package rainbow-delimiters
+  :hook (prog-mode . rainbow-delimiters-mode))
 
 (provide 'init-misc)
 
