@@ -10,10 +10,10 @@
 		(template-args-cont . +))))
 (setq c-default-style "my-cc-style")
 
-(with-eval-after-load "lsp-mode"
-  (add-hook 'c-mode-common-hook #'yas-minor-mode-on)
-  (add-hook 'c-mode-common-hook #'my/lsp)
-  )
+;; (with-eval-after-load "lsp-mode"
+;;   (add-hook 'c-mode-common-hook #'yas-minor-mode-on)
+;;   (add-hook 'c-mode-common-hook #'my/lsp)
+;;   )
 
 (provide 'init-c++)
 
