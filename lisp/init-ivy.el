@@ -23,11 +23,12 @@
          :map ivy-minibuffer-map
          ("RET" . ivy-alt-done)
          ("C-j" . ivy-immediate-done))
-  :config (ivy-mode))
+  :hook (after-init . ivy-mode))
 
 (use-package counsel
+  :diminish counsel-mode
   :after ivy
-  :config (counsel-mode))
+  :hook (ivy-mode . counsel-mode))
 
 (use-package ivy-rich
   :after (ivy counsel)
