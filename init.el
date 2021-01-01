@@ -35,9 +35,7 @@
 
 (require 'init-lsp)
 
-(require 'init-c++)
-
-(require 'init-python)
+(require 'init-prog)
 
 ;;; specific custom-file to keep init.el clean
 (setq custom-file "~/.emacs.d/custom.el")
