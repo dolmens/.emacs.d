@@ -25,6 +25,9 @@
 ;; ivy and other package from abo
 (require 'init-ivy)
 
+;; orgmode
+(require 'init-org)
+
 ;; all misc
 (require 'init-misc)
 
