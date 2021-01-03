@@ -178,22 +178,6 @@
 	(setq company-global-modes '(not eshell-mode))
   )
 
-(use-package clang-format
-  :ensure t
-  :config
-  (setq clang-format-style-option "llvm"))
-  ;; (add-hook 'c++-mode-hook
-  ;;           (lambda()
-  ;;             (define-key c-mode-base-map (kbd "TAB") 'clang-format-region))))
-
-(use-package clang-format+
-  :ensure t
-  :init
-  (add-hook 'c++-mode-hook 'clang-format+-mode)
-  :custom
-  (clang-format+-context 'modification)
-  )
-
 (use-package json-mode
   :ensure t)
 
