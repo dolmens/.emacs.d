@@ -268,6 +268,16 @@
 (use-package rainbow-delimiters
   :hook (prog-mode . rainbow-delimiters-mode))
 
+(when (string-equal system-type "darwin")
+  (when (executable-find "gls")
+    ;; Use GNU ls as `gls' from `coreutils' if available.
+    (setq insert-directory-program (executable-find "gls"))
+    (setq dired-use-ls-dired t)
+    (setq dired-listing-switches "-alh --group-directories-first")))
+
+
+
+
 (provide 'init-misc)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
