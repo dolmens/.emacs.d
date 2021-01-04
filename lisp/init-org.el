@@ -15,6 +15,8 @@
 (use-package org-superstar
   :hook ((org-mode . org-superstar-mode)))
 
+(use-package org-preview-html)
+
 (defun my/org-mode-hook ()
   (set-face-attribute 'org-level-1 nil :height 1.0 :box nil :background nil)
   (set-face-attribute 'org-level-2 nil :height 1.0 :box nil :background nil)
