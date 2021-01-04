@@ -37,6 +37,11 @@
   (setq ivy-rich-path-style 'abbrev)
   :config (ivy-rich-mode))
 
+(use-package ivy-prescient
+  :after counsel
+  :config
+  (ivy-prescient-mode 1))
+
 (provide 'init-ivy)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
