@@ -4,6 +4,16 @@
 
 ;;; Code:
 
+;; Increase gc size when startup
+(setq gc-cons-threshold 10000000)
+
+;; Restore gc size after startup
+(add-hook 'after-init-hook
+          (lambda ()
+            (setq gc-cons-threshold 1000000)
+            (message "gc-cons-threshold restored to %S"
+                     gc-cons-threshold)))
+
 ;; Package load path
 (add-to-list 'load-path (expand-file-name "lisp" user-emacs-directory))
 
