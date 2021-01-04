@@ -37,6 +37,9 @@
   (setq ivy-rich-path-style 'abbrev)
   :config (ivy-rich-mode))
 
+(use-package all-the-icons-ivy-rich
+  :init (all-the-icons-ivy-rich-mode 1))
+
 (use-package ivy-prescient
   :after counsel
   :config
