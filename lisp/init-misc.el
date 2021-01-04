@@ -13,6 +13,60 @@
   :config
   (dashboard-setup-startup-hook))
 
+(use-package ace-window
+  :custom-face
+  (aw-leading-char-face ((t ( :bold t :height 2.0))))
+  :bind (([remap other-window] . ace-window)
+         ("C-c w" . ace-window-hydra/body))
+  :hook (emacs-startup . ace-window-display-mode)
+  :config
+  (defun toggle-window-split ()
+    (interactive)
+    (if (= (count-windows) 2)
+        (let* ((this-win-buffer (window-buffer))
+               (next-win-buffer (window-buffer (next-window)))
+               (this-win-edges (window-edges (selected-window)))
+               (next-win-edges (window-edges (next-window)))
+               (this-win-2nd (not (and (<= (car this-win-edges)
+                                           (car next-win-edges))
+                                       (<= (cadr this-win-edges)
+                                           (cadr next-win-edges)))))
+               (splitter
+                (if (= (car this-win-edges)
+                       (car (window-edges (next-window))))
+                    'split-window-horizontally
+                  'split-window-vertically)))
+          (delete-other-windows)
+          (let ((first-win (selected-window)))
+            (funcall splitter)
+            (if this-win-2nd (other-window 1))
+            (set-window-buffer (selected-window) this-win-buffer)
+            (set-window-buffer (next-window) next-win-buffer)
+            (select-window first-win)
+            (if this-win-2nd (other-window 1))))
+      (user-error "`toggle-window-split' only supports two windows")))
+
+  ;; Bind hydra to dispatch list
+  (add-to-list 'aw-dispatch-alist '(?w ace-window-hydra/body) t)
+
+  ;; Select widnow via `M-1'...`M-9'
+  (defun aw--select-window (number)
+    "Slecet the specified window."
+    (when (numberp number)
+      (let ((found nil))
+        (dolist (win (aw-window-list))
+          (when (and (window-live-p win)
+                     (eq number (string-to-number (window-parameter win 'ace-window-path))))
+            (setq found t)
+            (aw-switch-to-window win)))
+        (unless found
+          (message "No specified window: %d" number)))))
+  (dotimes (n 9)
+    (bind-key (format "M-%d" (1+ n))
+              (lambda ()
+                (interactive)
+                (aw--select-window (1+ n))))))
+
 (use-package linum-off
 	:ensure t)
 
@@ -83,7 +137,7 @@
 (use-package smartparens
   :ensure t
   :diminish smartparens-mode
-  :init (smartparens-global-mode 1)
+  :hook (prog-mode . smartparens-global-mode)
   :config
   (sp-pair "(" ")" :unless '(sp-point-before-word-p))
   (sp-pair "{" "}" :unless '(sp-point-before-word-p))
