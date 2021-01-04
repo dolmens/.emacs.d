@@ -19,7 +19,7 @@
    ivy-virtual-abbreviate 'abbreviate
    ivy-count-format "(%d/%d) ")
   :bind (("C-s" . swiper-isearch)
-         ("s-f" . swiper-isearch)
+         ("s-f" . counsel-grep-or-swiper)
          ("C-c s" . counsel-rg)
          :map ivy-minibuffer-map
          ("RET" . ivy-alt-done)
