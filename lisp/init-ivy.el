@@ -11,6 +11,7 @@
   :diminish ivy-mode
   :init
   (setq
+   ivy-initial-inputs-alist nil
    ;; dont show . and .. in directory list
    ivy-extra-directories nil
    ;; use switch buffer to reopen recent killed files
