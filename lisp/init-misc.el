@@ -46,6 +46,7 @@
             (if this-win-2nd (other-window 1))))
       (user-error "`toggle-window-split' only supports two windows")))
 
+
   ;; Bind hydra to dispatch list
   (add-to-list 'aw-dispatch-alist '(?w ace-window-hydra/body) t)
 
@@ -202,7 +203,29 @@
 	 '(undo-tree-visualizer-current-face ((t (:foreground "default"))))	 
 	 '(undo-tree-visualizer-active-branch-face ((t (:foreground "default" :weight bold))))
 	 '(undo-tree-visualizer-default-face ((t (:foreground "default"))))
-	 ))
+         ))
+
+(defun xah-comment-dwim ()
+  "Like `comment-dwim', but toggle comment if cursor is not at end of line.
+
+URL `http://ergoemacs.org/emacs/emacs_toggle_comment_by_line.html'
+Version 2016-10-25"
+  (interactive)
+  (if (region-active-p)
+      (comment-dwim nil)
+    (let (($lbp (line-beginning-position))
+          ($lep (line-end-position)))
+      (if (eq $lbp $lep)
+          (progn
+            (comment-dwim nil))
+        (if (eq (point) $lep)
+            (progn
+              (comment-dwim nil))
+          (progn
+            (comment-or-uncomment-region $lbp $lep)
+            ;;(forward-line )
+            ))))))
+(global-set-key (kbd "M-;") 'xah-comment-dwim)
 
 ;; project manager
 (use-package projectile
@@ -221,12 +244,14 @@
   (counsel-projectile-mode))
 
 (use-package treemacs
-	:ensure t
-	:bind
-	(:map global-map
-				([f8] . treemacs)
-				("M-0" . treemacs-select-window)
-				("C-c 1" . treemacs-no-delete-other-windows)))
+  :ensure t
+  :bind
+  (:map global-map
+        ([f8] . treemacs)
+        ("M-0" . treemacs-select-window)
+        ("C-c 1" . treemacs-no-delete-other-windows))
+  :config
+  (setq aw-ignored-buffers (delete 'treemacs-mode aw-ignored-buffers)))
 
 (use-package treemacs-projectile
 	:after treemacs projectile
@@ -250,7 +275,7 @@
   :ensure t
   :defer nil
   :delight
-  ;; :custom
+  :custom
   (which-key-idle-delay 0.4)
   :config
   (which-key-mode t))
@@ -326,15 +351,12 @@
   (global-flycheck-mode)
   )
 
-;; ==============================================================================
-;; auto snippet
-;; ==============================================================================
-(use-package auto-yasnippet
-  :ensure t)
-
 (use-package imenu-anywhere
   :ensure t
   )
+
+(use-package yasnippet
+  :config (yas-global-mode 1))
 
 ;; ==============================================================================
 ;; company, complete anything
@@ -343,15 +365,17 @@
   :ensure t
   :diminish company-mode
   :init
-  (setq company-async-timeout 10
-		company-show-numbers t
-		company-dabbrev-downcase nil
-		company-idle-delay 0.1
-		)
+  (setq company-async-timeout 15
+        company-show-numbers t
+        company-minimum-prefix-length 1
+        company-idle-delay 0.0)
+  :bind (:map company-mode-map
+              ("C-." . company-complete))
   :config
-  (add-hook 'after-init-hook 'global-company-mode)
-	(setq company-global-modes '(not eshell-mode))
-  )
+  :hook (prog-mode . company-mode))
+
+(use-package company-box
+  :hook (company-mode . company-box-mode))
 
 (use-package json-mode
   :ensure t)
@@ -380,9 +404,8 @@
   (setq ws-butler-keep-whitespace-before-point nil)
   :diminish ws-butler-mode
   :commands (ws-butler-mode)
-  :init
-  (add-hook 'prog-mode-hook #'ws-butler-mode)
-  (add-hook 'org-mode-hook #'ws-butler-mode)
+  :hook
+  (prog-mode . ws-butler-mode)
   :config
   (setq ws-butler-convert-leading-tabs-or-spaces t))
 

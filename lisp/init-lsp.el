@@ -8,25 +8,21 @@
 ;;; Code:
 
 (use-package lsp-mode
-  :hook ((c++-mode . lsp))
-  :commands lsp)
+  :commands lsp
+  :hook ((c++-mode . lsp)
+         (lsp-mode . lsp-enable-which-key-integration))
+  :bind (:map lsp-mode-map
+              ("M-SPC" . lsp-signature-activate))
+  :init
+  (setq
+   lsp-clients-clangd-args
+   '("--header-insertion=never")))
 
-(use-package lsp-ui
-  :commands lsp-ui-mode)
+(use-package lsp-ui :commands lsp-ui-mode)
 
-(use-package lsp-ivy
-  :commands lsp-ivy-workspace-symbol)
+(use-package lsp-ivy :commands lsp-ivy-workspace-symbol)
 
-(use-package lsp-treemacs
-  :commands lsp-treemacs-erros-list)
-
-;; (defcustom lsp-clients-clangd-executable nil
-;;   "The clangd executable to use."
-;;   :group 'lsp-clangd
-;;   :risky t
-;;   :type 'file)
-
-(setq lsp-clients-clangd-executable "/usr/local/Cellar/llvm/11.0.0/bin/clangd")
+(use-package lsp-treemacs :commands lsp-treemacs-errors-list)
 
 ;; (use-package lsp-ui
 ;;     :config

@@ -25,6 +25,8 @@
 ;; python
 (use-package ein)
 
+(use-package cmake-mode)
+
 (provide 'init-prog)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
