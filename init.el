@@ -157,10 +157,10 @@
   (setq shackle-default-size 0.4
 	shackle-default-alignment 'below
 	shackle-rules
-	'(("*Help*" :select t :size 0.4 :align 'below :autoclose t)
-	  (compilation-mode :select t :size 0.4 :align 'below :autoclose t)
-	  (xref-mode :select t :size 0.4 :align 'below :autoclose t)
-	  (Buffer-menu-mode :select t :size 20 :align 'below :autoclose t))))
+	'(("*Help*" :select t :size 0.4 :align 'below)
+	  (compilation-mode :select t :size 0.4 :align 'below)
+	  (xref-mode :select t :size 0.4 :align 'below)
+	  (Buffer-menu-mode :select t :size 20 :align 'below))))
 
 
 (use-package projectile
