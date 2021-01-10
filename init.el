@@ -181,6 +181,17 @@
   (with-eval-after-load 'ace-window
     (setq aw-ignored-buffers (delete 'treemacs-mode aw-ignored-buffers))))
 
+;; rime
+
+(use-package rime
+  :init
+  (setq rime-librime-root "~/.emacs.d/librime/dist"
+	rime-show-candidate 'posframe)
+  :bind ("M-SPC" . toggle-input-method)
+  :custom
+  (default-input-method "rime"))
+
+
 ;; misc
 
 (use-package osx-trash
@@ -306,7 +317,7 @@ Version 2016-10-25"
   :hook ((c++-mode . lsp)
 	 (lsp-mode . lsp-enable-which-key-integration))
   :bind (:map lsp-mode-map
-	      ("M-SPC" . lsp-signature-activate))
+	      ("C-." . lsp-signature-activate))
   :init
   (let ((clangd "/usr/local/opt/llvm/bin/clangd"))
     (when (file-exists-p clangd)
