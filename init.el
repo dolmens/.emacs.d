@@ -159,7 +159,8 @@
 	shackle-rules
 	'(("*Help*" :select t :size 0.4 :align 'below :autoclose t)
 	  (compilation-mode :select t :size 0.4 :align 'below :autoclose t)
-	  (xref-mode :select t :size 0.4 :align 'below :autoclose t))))
+	  (xref-mode :select t :size 0.4 :align 'below :autoclose t)
+	  (Buffer-menu-mode :select t :size 20 :align 'below :autoclose t))))
 
 
 (use-package projectile
@@ -181,6 +182,25 @@
     (setq aw-ignored-buffers (delete 'treemacs-mode aw-ignored-buffers))))
 
 ;; misc
+
+(use-package osx-trash
+  :if (eq system-type 'darwin)
+  :init
+  (osx-trash-setup))
+
+(setq delete-by-moving-to-trash t)
+
+(use-package dired
+  :ensure nil
+  :init
+  (setq dired-recursive-deletes 'always)
+  (when (executable-find "gls")
+    (setq insert-directory-program "gls"))
+  :custom
+  (dired-listing-switches "-al --group-directories-first")
+  :bind (("C-x C-j" . dired-jump)
+	 :map dired-mode-map
+	 ("C-<backspace>" . dired-up-directory)))
 
 (use-package flycheck)
 
@@ -288,6 +308,9 @@ Version 2016-10-25"
   :bind (:map lsp-mode-map
 	      ("M-SPC" . lsp-signature-activate))
   :init
+  (let ((clangd "/usr/local/opt/llvm/bin/clangd"))
+    (when (file-exists-p clangd)
+      (setq lsp-clients-clangd-executable clangd)))
   (setq lsp-clients-clangd-args
 	'("--header-insertion=never")))
 
