@@ -19,9 +19,6 @@
 ;; show column number in modeline
 (column-number-mode)
 
-;; no hard tabs
-(setq indent-tabs-mode nil)
-
 ;; enable y and n for emacs queries
 (defalias 'yes-or-no-p 'y-or-n-p)
 
@@ -258,6 +255,15 @@
 
 
 ;; prog
+
+;; no hard tabs
+(setq indent-tabs-mode nil)
+(setq-default indent-tabs-mode nil)
+
+(use-package ws-butler
+  :diminish
+  :custom (ws-butler-keep-whitespace-before-point nil)
+  :hook (prog-mode . ws-butler-mode))
 
 (require 'cc-mode)
 
