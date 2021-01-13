@@ -335,7 +335,7 @@ Version 2016-10-25"
   (setq lsp-clients-clangd-args
 	'("--header-insertion=never")))
 
-(use-package lsp-ui :commands lsp-ui-mode)
+;; (use-package lsp-ui :commands lsp-ui-mode)
 
 (use-package lsp-ivy :commands lsp-ivy-workspace-symbol)
 
