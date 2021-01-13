@@ -210,6 +210,10 @@
 	 :map dired-mode-map
 	 ("C-<backspace>" . dired-up-directory)))
 
+(use-package dired-narrow
+  :bind (:map dired-mode-map
+              ("/" . dired-narrow)))
+
 (use-package flycheck)
 
 (use-package yasnippet
