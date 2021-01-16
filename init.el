@@ -22,6 +22,13 @@
 ;; enable y and n for emacs queries
 (defalias 'yes-or-no-p 'y-or-n-p)
 
+(setq-default abbrev-mode t)
+
+(require 'recentf)
+(setq recentf-filename-handlers
+      (append '(abbreviate-file-name) recentf-filename-handlers))
+(recentf-mode 1)
+
 ;; buffers reflect external file changes
 (global-auto-revert-mode t)
 
@@ -100,7 +107,7 @@
    ;; dont show . and .. in directory list
    ivy-extra-directories nil
    ;; use switch buffer to reopen recent killed files
-   ;; ivy-use-virtual-buffers t
+   ivy-use-virtual-buffers t
    ivy-virtual-abbreviate 'abbreviate
    ivy-count-format "(%d/%d) ")
   :bind (("C-s" . swiper-isearch)
@@ -137,11 +144,25 @@
   :hook
   (ivy-mode . ivy-prescient-mode))
 
+(use-package ivy-xref
+  :after ivy
+  :init
+  (setq xref-show-definitions-function #'ivy-xref-show-defs
+        xref-show-xrefs-function #'ivy-xref-show-xrefs))
+
 ;; evil
 
 (use-package evil
+  :init
+  (setq evil-want-keybinding nil)
   :hook
   (after-init . evil-mode))
+
+(use-package evil-collection
+  :after evil
+  :init (setq evil-collection-company-use-tng nil)
+  :hook
+  (evil-mode . evil-collection-init))
 
 (use-package general
   :config
@@ -149,18 +170,24 @@
     :states '(normal visual motion)
     "C-e" 'evil-end-of-line)
   (general-def
+    :states '(normal motion insert)
+    "M-." 'xref-find-definitions)
+  (general-def
     :states 'insert
     "C-a" 'move-beginning-of-line
-    "C-e" 'end-of-line)
+    "C-e" 'end-of-line
+    "C-k" 'kill-line)
   (general-def
     :prefix "SPC"
     :states '(normal visual)
     :keymaps 'override
     "SPC" 'counsel-M-x
     "b" '(:ignore t :which-key "buffer")
+    "c" '(:ignore t :which-key "code")
     "f" '(:ignore t :which-key "file")
     "p" '(:ignore t :which-key "project")
     "h" '(:ignore t :which-key "help")
+    "l" '(:ignore t :which-key "lsp")
     "w" '(:ignore t :which-key "window"))
   (general-def
    :prefix "SPC f"
@@ -182,6 +209,24 @@
     "d" 'all-the-icons-ivy-rich-kill-buffer
     "s" 'save-buffer)
    (general-def
+    :prefix "SPC c"
+    :states '(normal visual)
+    :keymaps 'override
+    "c" 'compile
+    "r" 'recompile
+    "x" 'flycheck-list-errors)
+   (general-def
+     :prefix "SPC l"
+     :states '(normal visual)
+     :keymaps 'override
+     "=" '(:ignore t :which-key "format")
+     "= =" 'lsp-format-buffer
+     "= r" 'lsp-format-region
+     "t" '(:ignore t :which-key "treemacs")
+     "t s" 'lsp-treemacs-symbols
+     "t e" 'lsp-treemacs-errors-list
+     "r" 'lsp-rename)
+  (general-def
     :prefix "SPC w"
     :states '(normal visual)
     :keymaps 'override
@@ -207,12 +252,6 @@
     "m" 'describe-mode
     "k" 'describe-key))
 
-
-;; (use-package evil-collection
-;;   :after evil
-;;   :hook
-;;   (evil-mode . evil-collection-init))
-
 (use-package which-key
   :diminish
   :custom
@@ -230,6 +269,7 @@
 	  (compilation-mode :select t :size 0.4 :align 'below)
 	  (xref-mode :select t :size 0.4 :align 'below)
           ("*LSP Lookup*" :select t :size 0.4 :align 'below)
+          ("*Flycheck errors*" :select t :size 0.4 :align 'below)
 	  (Buffer-menu-mode :select t :size 20 :align 'below))))
 
 
@@ -331,6 +371,8 @@
 (use-package magit
   :bind ("C-x g" . magit-status))
 
+(use-package evil-magit
+  :after (magit evil))
 
 ;; prog
 
@@ -415,9 +457,7 @@ Version 2016-10-25"
 (use-package lsp-ivy :commands lsp-ivy-workspace-symbol)
 
 (use-package lsp-treemacs
-  :commands lsp-treemacs-errors-list
-  :bind (:map lsp-mode-map
-              ("M-?" . lsp-treemacs-references)))
+  :commands lsp-treemacs-symbols)
 
 (use-package dap-mode)
 
