@@ -12,7 +12,10 @@
 
 (add-to-list 'default-frame-alist '(fullscreen . maximized))
 
-(setq inhibit-startup-message t)
+(setq
+ inhibit-splash-screen t
+ inhibit-startup-message t
+ initial-scratch-message nil)
 
 (setq ring-bell-function 'ignore)
 
@@ -110,7 +113,7 @@
    ivy-use-virtual-buffers t
    ivy-virtual-abbreviate 'abbreviate
    ivy-count-format "(%d/%d) ")
-  :bind (("C-s" . swiper-isearch)
+  :bind (;; ("C-s" . swiper-isearch)
          ("s-f" . counsel-grep-or-swiper)
          ("C-c s" . counsel-rg)
          :map ivy-minibuffer-map
