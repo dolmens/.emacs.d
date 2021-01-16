@@ -87,6 +87,9 @@
 (use-package doom-modeline
   :hook (after-init . doom-modeline-mode))
 
+(use-package winum
+  :hook (after-init . winum-mode))
+
 ;; ivy
 
 (use-package ivy
@@ -97,7 +100,7 @@
    ;; dont show . and .. in directory list
    ivy-extra-directories nil
    ;; use switch buffer to reopen recent killed files
-   ivy-use-virtual-buffers t
+   ;; ivy-use-virtual-buffers t
    ivy-virtual-abbreviate 'abbreviate
    ivy-count-format "(%d/%d) ")
   :bind (("C-s" . swiper-isearch)
@@ -134,19 +137,88 @@
   :hook
   (ivy-mode . ivy-prescient-mode))
 
+;; evil
+
+(use-package evil
+  :hook
+  (after-init . evil-mode))
+
+(use-package general
+  :config
+  (general-def
+    :states '(normal visual motion)
+    "C-e" 'evil-end-of-line)
+  (general-def
+    :states 'insert
+    "C-a" 'move-beginning-of-line
+    "C-e" 'end-of-line)
+  (general-def
+    :prefix "SPC"
+    :states '(normal visual)
+    :keymaps 'override
+    "SPC" 'counsel-M-x
+    "b" '(:ignore t :which-key "buffer")
+    "f" '(:ignore t :which-key "file")
+    "p" '(:ignore t :which-key "project")
+    "h" '(:ignore t :which-key "help")
+    "w" '(:ignore t :which-key "window"))
+  (general-def
+   :prefix "SPC f"
+   :states '(normal visual)
+   :keymaps 'override
+   "f" 'counsel-find-file
+   "r" 'counsel-recentf)
+  (general-def
+    :prefix "SPC p"
+    :states '(normal visual)
+    :keymaps 'override
+    "f" 'counsel-projectile-find-file
+    "p" 'counsel-projectile-switch-project)
+   (general-def
+    :prefix "SPC b"
+    :states '(normal visual)
+    :keymaps 'override
+    "b" 'ivy-switch-buffer
+    "d" 'all-the-icons-ivy-rich-kill-buffer
+    "s" 'save-buffer)
+   (general-def
+    :prefix "SPC w"
+    :states '(normal visual)
+    :keymaps 'override
+    "o" 'other-window
+    "n" 'next-window
+    "p" 'previous-window
+    "0" 'winum-select-window-0
+    "1" 'winum-select-window-1
+    "2" 'winum-select-window-2
+    "3" 'winum-select-window-3
+    "4" 'winum-select-window-4
+    "5" 'winum-select-window-5
+    "6" 'winum-select-window-6
+    "7" 'winum-select-window-7
+    "8" 'winum-select-window-8
+    "9" 'winum-select-window-9)
+   (general-def
+    :prefix "SPC h"
+    :states '(normal visual)
+    :keymaps 'override
+    "f" 'counsel-describe-function
+    "v" 'counsel-describe-variable
+    "m" 'describe-mode
+    "k" 'describe-key))
+
+
+;; (use-package evil-collection
+;;   :after evil
+;;   :hook
+;;   (evil-mode . evil-collection-init))
+
 (use-package which-key
   :diminish
   :custom
   (which-key-idle-delay 0.4)
   :hook
   (after-init . which-key-mode))
-
-(use-package ace-window
-  :custom-face
-  (aw-leading-char-face ((t (:inherit font-lock-keyword-face :bold t :height 3.0))))
-  (aw-minibuffer-leading-char-face ((t (:inherit font-lock-keyword-face :bold t :height 2.0))))
-  (aw-mode-line-face ((t (:inherit mode-line-emphasis :bold t))))  
-  :bind (([remap other-window] . ace-window)))
 
 (use-package shackle
   :hook (after-init . shackle-mode)
@@ -157,6 +229,7 @@
 	'(("*Help*" :select t :size 0.4 :align 'below)
 	  (compilation-mode :select t :size 0.4 :align 'below)
 	  (xref-mode :select t :size 0.4 :align 'below)
+          ("*LSP Lookup*" :select t :size 0.4 :align 'below)
 	  (Buffer-menu-mode :select t :size 20 :align 'below))))
 
 
@@ -173,10 +246,11 @@
 
 (use-package treemacs
   :bind (([f8]  . treemacs)
-	 ("M-0" . treemacs-select-window))
-  :config
-  (with-eval-after-load 'ace-window
-    (setq aw-ignored-buffers (delete 'treemacs-mode aw-ignored-buffers))))
+	 ("M-0" . treemacs-select-window)))
+
+(use-package treemacs-evil
+  :after treemacs evil
+  :demand t)
 
 ;; rime
 
@@ -272,6 +346,7 @@
 (require 'cc-mode)
 
 (define-key c-mode-base-map (kbd "<f6>") 'compile)
+(define-key c-mode-base-map (kbd "<C-f6>") 'recompile)
 
 (defun xah-comment-dwim ()
   "Like `comment-dwim', but toggle comment if cursor is not at end of line.
@@ -339,7 +414,10 @@ Version 2016-10-25"
 
 (use-package lsp-ivy :commands lsp-ivy-workspace-symbol)
 
-(use-package lsp-treemacs :commands lsp-treemacs-errors-list)
+(use-package lsp-treemacs
+  :commands lsp-treemacs-errors-list
+  :bind (:map lsp-mode-map
+              ("M-?" . lsp-treemacs-references)))
 
 (use-package dap-mode)
 
