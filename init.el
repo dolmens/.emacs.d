@@ -157,7 +157,8 @@
 
 (use-package evil
   :init
-  (setq evil-want-keybinding nil)
+  (setq evil-want-keybinding nil
+        evil-search-module 'evil-search)
   :hook
   (after-init . evil-mode))
 
@@ -447,7 +448,8 @@ Version 2016-10-25"
   :hook ((c++-mode . lsp)
 	 (lsp-mode . lsp-enable-which-key-integration))
   :bind (:map lsp-mode-map
-	      ("C-." . lsp-signature-activate))
+	      ("C-." . company-search-candidates)
+              ("C-," . lsp-signature-activate))
   :init
   (let ((clangd "/usr/local/opt/llvm/bin/clangd"))
     (when (file-exists-p clangd)
