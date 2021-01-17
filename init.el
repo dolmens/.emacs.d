@@ -168,6 +168,11 @@
   :hook
   (evil-mode . evil-collection-init))
 
+(add-hook 'eshell-mode-hook
+          (lambda ()
+            (evil-collection-define-key 'insert 'eshell-mode-map
+              (kbd "C-a") 'eshell-bol)))
+
 (use-package general
   :config
   (general-def
@@ -178,9 +183,14 @@
     "M-." 'xref-find-definitions)
   (general-def
     :states 'insert
-    "C-a" 'move-beginning-of-line
+    "C-a" 'beginning-of-line
     "C-e" 'end-of-line
     "C-k" 'kill-line)
+  (general-def
+    :states '(normal insert)
+    :keymaps 'prog-mode-map
+    "C-a" 'mwim-beginning
+    "C-e" 'mwim-end)
   (general-def
     :prefix "SPC"
     :states '(normal visual)
@@ -388,6 +398,10 @@
   :diminish
   :custom (ws-butler-keep-whitespace-before-point nil)
   :hook (prog-mode . ws-butler-mode))
+
+(use-package mwim
+  :bind (:map prog-mode-map
+              ("C-a" . mwim-beginning)))
 
 (require 'cc-mode)
 
