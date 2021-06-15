@@ -113,7 +113,7 @@
    ivy-use-virtual-buffers t
    ivy-virtual-abbreviate 'abbreviate
    ivy-count-format "(%d/%d) ")
-  :bind (;; ("C-s" . swiper-isearch)
+  :bind (("C-s" . swiper-isearch)
          ("s-f" . counsel-grep-or-swiper)
          ("C-c s" . counsel-rg)
          :map ivy-minibuffer-map
@@ -126,10 +126,42 @@
   :after ivy
   :hook (ivy-mode . counsel-mode))
 
+(defun +ivy-rich-describe-variable-transformer (cand)
+  "Previews the value of the variable in the minibuffer"
+  (let* ((sym (intern cand))
+         (val (and (boundp sym) (symbol-value sym)))
+         (print-level 3))
+    (replace-regexp-in-string
+     "[\n\t\^[\^M\^@\^G]" " "
+     (cond ((booleanp val)
+            (propertize (format "%s" val) 'face
+                        (if (null val)
+                            'font-lock-comment-face
+                          'success)))
+           ((symbolp val)
+            (propertize (format "'%s" val)
+                        'face 'highlight-quoted-symbol))
+           ((keymapp val)
+            (propertize "<keymap>" 'face 'font-lock-constant-face))
+           ((listp val)
+            (prin1-to-string val))
+           ((stringp val)
+            (propertize (format "%S" val) 'face 'font-lock-string-face))
+           ((numberp val)
+            (propertize (format "%s" val) 'face 'highlight-numbers-number))
+           ((format "%s" val)))
+     t)))
+
 (use-package ivy-rich
   :after (ivy counsel)
   :init
   (setq ivy-rich-path-style 'abbrev)
+  (plist-put ivy-rich-display-transformers-list
+             'counsel-describe-variable
+             '(:columns
+               ((counsel-describe-variable-transformer (:width 40))
+                (+ivy-rich-describe-variable-transformer (:width 50))
+                (ivy-rich-counsel-variable-docstring (:face font-lock-doc-face)))))
   :hook (counsel-mode . ivy-rich-mode))
 
 (use-package all-the-icons-ivy-rich
@@ -192,6 +224,10 @@
     "C-a" 'mwim-beginning
     "C-e" 'mwim-end)
   (general-def
+    :states 'normal
+    :keymaps 'c++-mode-map
+    "gh" 'ff-find-other-file)
+  (general-def
     :prefix "SPC"
     :states '(normal visual)
     :keymaps 'override
@@ -214,7 +250,13 @@
     :states '(normal visual)
     :keymaps 'override
     "f" 'counsel-projectile-find-file
-    "p" 'counsel-projectile-switch-project)
+    "p" 'counsel-projectile-switch-project
+    "s" 'counsel-rg)
+  (general-def
+    :prefix "SPC s"
+    :states '(normal visual)
+    :keymaps 'override
+    "s" 'counsel-rg)
    (general-def
     :prefix "SPC b"
     :states '(normal visual)
@@ -226,7 +268,7 @@
     :prefix "SPC c"
     :states '(normal visual)
     :keymaps 'override
-    "c" 'compile
+    "c" 'projectile-compile-project
     "r" 'recompile
     "x" 'flycheck-list-errors)
    (general-def
@@ -380,6 +422,14 @@
 
 (use-package org-preview-html)
 
+(use-package evil-org
+  :ensure t
+  :after org
+  :hook (org-mode . (lambda () evil-org-mode))
+  :config
+  (require 'evil-org-agenda)
+  (evil-org-agenda-set-keys))
+
 ;; magit
 
 (use-package magit
@@ -405,8 +455,14 @@
 
 (require 'cc-mode)
 
-(define-key c-mode-base-map (kbd "<f6>") 'compile)
+(define-key c-mode-base-map (kbd "<f6>") 'projectile-compile-project)
 (define-key c-mode-base-map (kbd "<C-f6>") 'recompile)
+(add-hook 'compilation-mode-hook
+          (lambda ()
+            (define-key compilation-mode-map (kbd "<f6>") 'projectile-compile-project)
+            (define-key compilation-mode-map (kbd "<C-f6>") 'recompile)))
+
+(setq compilation-scroll-output t)
 
 (defun xah-comment-dwim ()
   "Like `comment-dwim', but toggle comment if cursor is not at end of line.
@@ -460,6 +516,7 @@ Version 2016-10-25"
 (use-package lsp-mode
   :commands lsp
   :hook ((c++-mode . lsp)
+         (c-mode . lsp)
 	 (lsp-mode . lsp-enable-which-key-integration))
   :bind (:map lsp-mode-map
 	      ("C-." . company-search-candidates)
@@ -479,6 +536,43 @@ Version 2016-10-25"
   :commands lsp-treemacs-symbols)
 
 (use-package dap-mode)
+
+(use-package cmake-mode
+  :init
+  (setq cmake-tab-width 4))
+
+(use-package markdown-mode
+  :commands (markdown-mode gfm-mode)
+  :mode (("README\\.md\\'" . gfm-mode)
+         ("\\.md\\'" . markdown-mode)
+         ("\\.markdown\\'" . markdown-mode))
+  :init (setq markdown-command "multimarkdown"))
+
+;;; mac double finger
+(defvar my-previous-buffer-last-time
+      (float-time))
+
+(defun my-previous-buffer ()
+  (interactive)
+  (let* ((current-time (float-time))
+         (elapse (- current-time my-previous-buffer-last-time)))
+    (setq my-previous-buffer-last-time current-time)
+    (when (> elapse 0.5)
+      (previous-buffer))))
+
+(defvar my-next-buffer-last-time
+      (float-time))
+
+(defun my-next-buffer ()
+  (interactive)
+  (let* ((current-time (float-time))
+          (elapse (- current-time my-next-buffer-last-time)))
+       (setq my-next-buffer-last-time current-time)
+       (when (> elapse 0.5)
+         (next-buffer))))
+
+(global-set-key [double-wheel-left] 'my-previous-buffer)
+(global-set-key [double-wheel-right] 'my-next-buffer)
 
 ;;; specific custom-file to keep init.el clean
 (setq custom-file "~/.emacs.d/custom.el")
