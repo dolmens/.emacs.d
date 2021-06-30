@@ -4,6 +4,8 @@
 
 ;;; Code:
 
+(add-to-list 'load-path "~/.emacs.d/lisp/")
+
 ;; Increase gc size when startup, will be reset later by gcmh
 (setq gc-cons-threshold most-positive-fixnum)
 
@@ -205,6 +207,13 @@
             (evil-collection-define-key 'insert 'eshell-mode-map
               (kbd "C-a") 'eshell-bol)))
 
+(defun lsp-format-region-or-buffer ()
+  "Format region if region activated or format the whole buffer."
+  (interactive)
+  (if (region-active-p)
+      (lsp-format-region (region-beginning) (region-end))
+    (lsp-format-buffer)))
+
 (use-package general
   :config
   (general-def
@@ -232,19 +241,14 @@
     :states '(normal visual)
     :keymaps 'override
     "SPC" 'counsel-M-x
-    "b" '(:ignore t :which-key "buffer")
+    "f" 'counsel-find-file
+    "b" 'ivy-switch-buffer
+    "s" 'counsel-rg
     "c" '(:ignore t :which-key "code")
-    "f" '(:ignore t :which-key "file")
     "p" '(:ignore t :which-key "project")
     "h" '(:ignore t :which-key "help")
     "l" '(:ignore t :which-key "lsp")
     "w" '(:ignore t :which-key "window"))
-  (general-def
-   :prefix "SPC f"
-   :states '(normal visual)
-   :keymaps 'override
-   "f" 'counsel-find-file
-   "r" 'counsel-recentf)
   (general-def
     :prefix "SPC p"
     :states '(normal visual)
@@ -252,18 +256,6 @@
     "f" 'counsel-projectile-find-file
     "p" 'counsel-projectile-switch-project
     "s" 'counsel-rg)
-  (general-def
-    :prefix "SPC s"
-    :states '(normal visual)
-    :keymaps 'override
-    "s" 'counsel-rg)
-   (general-def
-    :prefix "SPC b"
-    :states '(normal visual)
-    :keymaps 'override
-    "b" 'ivy-switch-buffer
-    "d" 'all-the-icons-ivy-rich-kill-buffer
-    "s" 'save-buffer)
    (general-def
     :prefix "SPC c"
     :states '(normal visual)
@@ -275,9 +267,7 @@
      :prefix "SPC l"
      :states '(normal visual)
      :keymaps 'override
-     "=" '(:ignore t :which-key "format")
-     "= =" 'lsp-format-buffer
-     "= r" 'lsp-format-region
+     "=" 'lsp-format-region-or-buffer
      "t" '(:ignore t :which-key "treemacs")
      "t s" 'lsp-treemacs-symbols
      "t e" 'lsp-treemacs-errors-list
@@ -286,6 +276,7 @@
     :prefix "SPC w"
     :states '(normal visual)
     :keymaps 'override
+    "w" 'winner-undo
     "o" 'other-window
     "n" 'next-window
     "p" 'previous-window
@@ -459,7 +450,7 @@
 (define-key c-mode-base-map (kbd "<C-f6>") 'recompile)
 (add-hook 'compilation-mode-hook
           (lambda ()
-            (define-key compilation-mode-map (kbd "<f6>") 'projectile-compile-project)
+            (define-key compilation-mode-map (kbd "<f6>") 'compile)
             (define-key compilation-mode-map (kbd "<C-f6>") 'recompile)))
 
 (setq compilation-scroll-output t)
@@ -513,10 +504,19 @@ Version 2016-10-25"
                 (template-args-cont . +))))
 (setq c-default-style "my-cc-style")
 
+(use-package go-mode
+  :init
+  (add-hook 'go-mode-hook
+            (lambda ()
+              (setq tab-width 4)))
+  :bind (:map go-mode-map)
+  ("<f6>" . compile))
+
 (use-package lsp-mode
   :commands lsp
   :hook ((c++-mode . lsp)
          (c-mode . lsp)
+         (go-mode . lsp)
 	 (lsp-mode . lsp-enable-which-key-integration))
   :bind (:map lsp-mode-map
 	      ("C-." . company-search-candidates)
@@ -528,12 +528,22 @@ Version 2016-10-25"
   (setq lsp-clients-clangd-args
 	'("--header-insertion=never")))
 
-;; (use-package lsp-ui :commands lsp-ui-mode)
+(use-package lsp-ui
+  :init
+  (setq lsp-ui-doc-enable nil)
+  (setq lsp-ui-sideline-show-diagnostics nil))
 
 (use-package lsp-ivy :commands lsp-ivy-workspace-symbol)
 
 (use-package lsp-treemacs
   :commands lsp-treemacs-symbols)
+
+(use-package lsp-pyright
+  :init
+  (setq lsp-pyright-python-executable-cmd "python3")
+  :hook (python-mode . (lambda ()
+                         (require 'lsp-pyright)
+                         (lsp))))
 
 (use-package dap-mode)
 
@@ -551,6 +561,8 @@ Version 2016-10-25"
 ;;; mac double finger
 (defvar my-previous-buffer-last-time
       (float-time))
+
+(winner-mode 1)
 
 (defun my-previous-buffer ()
   (interactive)
