@@ -512,11 +512,22 @@ Version 2016-10-25"
   :bind (:map go-mode-map)
   ("<f6>" . compile))
 
+(defun lsp-go-install-save-hooks ()
+  (add-hook 'before-save-hook #'lsp-format-buffer t t)
+  (add-hook 'before-save-hook #'lsp-organize-imports t t))
+(add-hook 'go-mode-hook #'lsp-go-install-save-hooks)
+
+
+(defun filtered/lsp ()
+  (when (and (buffer-file-name)
+             (f-descendant-of-p (buffer-file-name) "/Users/sunyiming/works"))
+      (lsp)))
+
 (use-package lsp-mode
   :commands lsp
-  :hook ((c++-mode . lsp)
-         (c-mode . lsp)
-         (go-mode . lsp)
+  :hook ((c++-mode . filtered/lsp)
+         (c-mode . filtered/lsp)
+         (go-mode . filtered/lsp)
 	 (lsp-mode . lsp-enable-which-key-integration))
   :bind (:map lsp-mode-map
 	      ("C-." . company-search-candidates)
@@ -538,14 +549,29 @@ Version 2016-10-25"
 (use-package lsp-treemacs
   :commands lsp-treemacs-symbols)
 
+(setq python-indent-guess-indent-offset-verbose nil)
+
 (use-package lsp-pyright
   :init
   (setq lsp-pyright-python-executable-cmd "python3")
   :hook (python-mode . (lambda ()
                          (require 'lsp-pyright)
-                         (lsp))))
+                         (filtered/lsp))))
 
-(use-package dap-mode)
+(use-package dap-mode
+  :config
+  (require 'dap-lldb)
+  (setq dap-lldb-debug-program '("/usr/local/opt/llvm/bin/lldb-vscode"))
+  (setq dap-lldb-debugged-program-function
+        (lambda () (read-file-name "select file to debug")))
+  (defun dap-lldb-edit ()
+    "Edit the C++ debugging configuration or create + edit if none exists yet."
+    (interactive)
+    (let ((filename (concat (lsp-workspace-root) "/launch.json"))
+	  (default "~/.emacs.d/resources/lldb-launch.json"))
+      (unless (file-exists-p filename)
+	(copy-file default filename))
+      (find-file-existing filename))))
 
 (use-package cmake-mode
   :init

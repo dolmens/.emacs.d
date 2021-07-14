@@ -5,3 +5,5 @@
 !init.el
 !eshell/
 !eshell/alias
+!resources/
+!resources/*
