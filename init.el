@@ -102,6 +102,8 @@
 (use-package winum
   :hook (after-init . winum-mode))
 
+(use-package wgrep-ag)
+
 ;; ivy
 
 (use-package ivy
@@ -260,9 +262,10 @@
     :prefix "SPC c"
     :states '(normal visual)
     :keymaps 'override
-    "c" 'projectile-compile-project
-    "r" 'recompile
-    "x" 'flycheck-list-errors)
+    "i" 'lsp-ui-imenu
+    "e" 'flycheck-list-errors
+    "=" 'clang-format-region-or-buffer
+    )
    (general-def
      :prefix "SPC l"
      :states '(normal visual)
@@ -532,6 +535,8 @@ Version 2016-10-25"
   :bind (:map lsp-mode-map
 	      ("C-." . company-search-candidates)
               ("C-," . lsp-signature-activate))
+  :custom
+  (lsp-enable-snippet t)
   :init
   (let ((clangd "/usr/local/opt/llvm/bin/clangd"))
     (when (file-exists-p clangd)
@@ -542,7 +547,10 @@ Version 2016-10-25"
 (use-package lsp-ui
   :init
   (setq lsp-ui-doc-enable nil)
-  (setq lsp-ui-sideline-show-diagnostics nil))
+  (setq lsp-ui-sideline-show-diagnostics nil)
+  :bind (:map lsp-ui-mode-map
+              ([remap xref-find-definitions] . lsp-ui-peek-find-definitions)
+              ([remap xref-find-references] . lsp-ui-peek-find-references)))
 
 (use-package lsp-ivy :commands lsp-ivy-workspace-symbol)
 
@@ -572,6 +580,17 @@ Version 2016-10-25"
       (unless (file-exists-p filename)
 	(copy-file default filename))
       (find-file-existing filename))))
+
+(use-package clang-format+
+  :init
+  (add-hook 'c-mode-common-hook #'clang-format+-mode))
+
+(defun clang-format-region-or-buffer ()
+  "Format region if region activated or format the whole buffer."
+  (interactive)
+  (if (region-active-p)
+      (clang-format-region (region-beginning) (region-end))
+    (clang-format-buffer)))
 
 (use-package cmake-mode
   :init
