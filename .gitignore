@@ -1,10 +1,9 @@
 *
 !README.md
 !.gitignore
+!early-init.el
 !init.el
-!site-lisp/
-!site-lisp/*
-!lisp/
-!lisp/*
 !eshell/
 !eshell/alias
+!resources/
+!resources/*
