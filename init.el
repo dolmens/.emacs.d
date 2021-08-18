@@ -547,6 +547,7 @@ Version 2016-10-25"
   :custom
   (lsp-enable-snippet t)
   :init
+  (setq lsp-enable-snippet nil)
   (setq lsp-clients-clangd-args
 	'("--header-insertion=never")))
 
