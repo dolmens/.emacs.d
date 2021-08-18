@@ -6,9 +6,6 @@
 
 (add-to-list 'load-path "~/.emacs.d/lisp/")
 
-;; Increase gc size when startup, will be reset later by gcmh
-(setq gc-cons-threshold most-positive-fixnum)
-
 ;; for child process pipe
 (setq read-process-output-max (* 1024 1024))
 
@@ -416,10 +413,17 @@
 
 (use-package org-preview-html)
 
+(use-package org-roam
+  :init
+  (setq org-roam-v2-ack t)
+  :custom
+  (org-roam-directory "~/Documents/roam")
+  :config
+  (org-roam-setup))
+
 (use-package evil-org
   :ensure t
   :after org
-  :hook (org-mode . (lambda () evil-org-mode))
   :config
   (require 'evil-org-agenda)
   (evil-org-agenda-set-keys))
@@ -428,9 +432,6 @@
 
 (use-package magit
   :bind ("C-x g" . magit-status))
-
-(use-package evil-magit
-  :after (magit evil))
 
 ;; prog
 
@@ -520,10 +521,18 @@ Version 2016-10-25"
   (add-hook 'before-save-hook #'lsp-organize-imports t t))
 (add-hook 'go-mode-hook #'lsp-go-install-save-hooks)
 
+(defcustom filter-lsp-directories nil
+  "lsp enabled directories.
+'nil' means all directories enabled."
+  :group 'lsp
+  :type '(repeat directory))
 
 (defun filtered/lsp ()
-  (when (and (buffer-file-name)
-             (f-descendant-of-p (buffer-file-name) "/Users/sunyiming/works"))
+  (when (or (not filter-lsp-directories)
+            (and (buffer-file-name)
+                 (cl-some (lambda (path)
+                            (f-descendant-of-p (buffer-file-name) path))
+                          filter-lsp-directories)))
       (lsp)))
 
 (use-package lsp-mode
@@ -538,9 +547,6 @@ Version 2016-10-25"
   :custom
   (lsp-enable-snippet t)
   :init
-  (let ((clangd "/usr/local/opt/llvm/bin/clangd"))
-    (when (file-exists-p clangd)
-      (setq lsp-clients-clangd-executable clangd)))
   (setq lsp-clients-clangd-args
 	'("--header-insertion=never")))
 
