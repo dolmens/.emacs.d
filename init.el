@@ -272,6 +272,22 @@
      "t s" 'lsp-treemacs-symbols
      "t e" 'lsp-treemacs-errors-list
      "r" 'lsp-rename)
+   (general-def
+     :prefix "SPC n"
+     :states '(normal visual)
+     :keymaps 'override
+     "f" 'org-roam-node-find
+     "r" 'org-roam-node-random)
+   (general-def
+     :prefix "SPC n"
+     :states '(normal visual)
+     :keymaps  'org-mode-map
+     "i" 'org-roam-node-insert
+     "o" 'org-id-get-create
+     "t" 'org-roam-tag-add
+     "a" 'org-roam-alias-add
+     "l" 'org-roam-buffer-toggle
+     "b" 'org-mark-ring-goto)
   (general-def
     :prefix "SPC w"
     :states '(normal visual)
@@ -401,6 +417,20 @@
 	undo-tree-visualizer-timestamps t))
 
 
+(when (string-equal system-type "darwin")
+  (setenv "DICTIONARY" "en_US"))
+
+(use-package flyspell
+  ;; :init
+  ;; (setq ispell-local-dictionary "en_US")
+  :config
+  (setq ispell-program-name "hunspell"
+        ispell-default-dictionary "en_US")
+  :hook (text-mode . flyspell-mode)
+  :bind (("M-<f7>" . flyspell-buffer)
+         ("<f7>" . flyspell-word)
+         ("C-;" . flyspell-auto-correct-previous-word)))
+
 ;; orgmode
 
 (use-package org
@@ -408,7 +438,18 @@
   :ensure
   org-plus-contrib)
 
+(setq org-startup-indented t
+      org-pretty-entities t
+      org-hide-emphasis-markers t
+      org-startup-with-inline-images t
+      org-image-actual-width '(300))
+
+(use-package org-appear
+  :hook (org-mode . org-appear-mode))
+
 (use-package org-superstar
+  :config
+  (setq org-superstar-special-todo-items t)
   :hook ((org-mode . org-superstar-mode)))
 
 (use-package org-preview-html)
@@ -419,7 +460,17 @@
   :custom
   (org-roam-directory "~/Documents/roam")
   :config
-  (org-roam-setup))
+  (org-roam-setup)
+  :bind
+  (("C-c n f" . org-roam-node-find)
+           ("C-c n g" . org-roam-graph)
+           ("C-c n r" . org-roam-node-random)
+           (:map org-mode-map
+                 (("C-c n i" . org-roam-node-insert)
+                  ("C-c n o" . org-id-get-create)
+                  ("C-c n t" . org-roam-tag-add)
+                  ("C-c n a" . org-roam-alias-add)
+                  ("C-c n l" . org-roam-buffer-toggle)))))
 
 (use-package evil-org
   :ensure t
