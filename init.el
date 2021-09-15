@@ -18,6 +18,9 @@
 
 (setq ring-bell-function 'ignore)
 
+(unless window-system
+  (xterm-mouse-mode t))
+
 ;; show column number in modeline
 (column-number-mode)
 
@@ -501,8 +504,8 @@
 
 (require 'cc-mode)
 
-(define-key c-mode-base-map (kbd "<f6>") 'projectile-compile-project)
-(define-key c-mode-base-map (kbd "<C-f6>") 'recompile)
+(define-key prog-mode-map (kbd "<f6>") 'projectile-compile-project)
+(define-key prog-mode-map (kbd "<C-f6>") 'recompile)
 (add-hook 'compilation-mode-hook
           (lambda ()
             (define-key compilation-mode-map (kbd "<f6>") 'compile)
