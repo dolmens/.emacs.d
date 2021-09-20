@@ -192,22 +192,31 @@
 ;; evil
 
 (use-package evil
+  :defines my-evil-initial-emacs-modes
   :init
   (setq evil-want-keybinding nil
         evil-search-module 'evil-search)
+  (setq my-evil-initial-emacs-modes '(flycheck-error-list-mode))
   :hook
-  (after-init . evil-mode))
+  (after-init . evil-mode)
+  (evil-mode . (lambda ()
+                 (dolist (mode my-evil-initial-emacs-modes)
+                   (evil-set-initial-state mode 'emacs))))
+  (eshell-mode . (lambda ()
+                   (define-key evil-insert-state-local-map
+                     (kbd "C-a") 'eshell-bol)
+                   (define-key evil-insert-state-local-map
+                     (kbd "C-e") 'end-of-line)
+                   (define-key evil-insert-state-local-map
+                     (kbd "C-k") 'kill-line))))
 
 (use-package evil-collection
   :after evil
-  :init (setq evil-collection-company-use-tng nil)
   :hook
   (evil-mode . evil-collection-init))
 
-(add-hook 'eshell-mode-hook
-          (lambda ()
-            (evil-collection-define-key 'insert 'eshell-mode-map
-              (kbd "C-a") 'eshell-bol)))
+(use-package esh-autosuggest
+  :hook (eshell-mode . esh-autosuggest-mode))
 
 (defun lsp-format-region-or-buffer ()
   "Format region if region activated or format the whole buffer."
@@ -224,11 +233,6 @@
   (general-def
     :states '(normal motion insert)
     "M-." 'xref-find-definitions)
-  (general-def
-    :states 'insert
-    "C-a" 'beginning-of-line
-    "C-e" 'end-of-line
-    "C-k" 'kill-line)
   (general-def
     :states '(normal insert)
     :keymaps 'prog-mode-map
@@ -394,7 +398,9 @@
   :bind (:map dired-mode-map
               ("/" . dired-narrow)))
 
-(use-package flycheck)
+(use-package flycheck
+  :hook
+  (after-init . global-flycheck-mode))
 
 (use-package yasnippet
   :diminish
@@ -428,7 +434,7 @@
   ;; (setq ispell-local-dictionary "en_US")
   :config
   (setq ispell-program-name "hunspell"
-        ispell-default-dictionary "en_US")
+        ispell-dictionary "en_US")
   :hook (text-mode . flyspell-mode)
   :bind (("M-<f7>" . flyspell-buffer)
          ("<f7>" . flyspell-word)
@@ -439,13 +445,13 @@
 (use-package org
   :pin org
   :ensure
-  org-plus-contrib)
-
-(setq org-startup-indented t
+  org-plus-contrib
+  :config
+ (setq org-startup-indented t
       org-pretty-entities t
       org-hide-emphasis-markers t
       org-startup-with-inline-images t
-      org-image-actual-width '(300))
+      org-image-actual-width '(300)))
 
 (use-package org-appear
   :hook (org-mode . org-appear-mode))
@@ -600,7 +606,7 @@ Version 2016-10-25"
               ("C-," . lsp-signature-activate))
   :custom
   (lsp-enable-snippet t)
-  :init
+  :config
   (setq lsp-clients-clangd-args
 	'("--header-insertion=never")))
 
