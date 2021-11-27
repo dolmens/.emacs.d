@@ -21,6 +21,8 @@
 (unless window-system
   (xterm-mouse-mode t))
 
+;; (setq frame-background-mode 'dark)
+
 ;; show column number in modeline
 (column-number-mode)
 
@@ -36,6 +38,10 @@
 
 ;; buffers reflect external file changes
 (global-auto-revert-mode t)
+
+(add-hook 'after-change-major-mode-hook
+          (lambda ()
+            (modify-syntax-entry ?_ "w")))
 
 ;; better keep backup files
 (make-directory "~/.emacs.d/backups" t)
@@ -80,7 +86,7 @@
            when (font-installed-p font)
            return (set-face-attribute 'default nil
                                       :font font
-                                      :height 130))
+                                      :height 140))
 
   ;; Specify font for all unicode characters
   (cl-loop for font in '("Symbola" "Apple Symbols" "Symbol" "icons-in-terminal")
@@ -254,6 +260,7 @@
     "p" '(:ignore t :which-key "project")
     "h" '(:ignore t :which-key "help")
     "l" '(:ignore t :which-key "lsp")
+    "j" 'projectile-compile-project
     "w" '(:ignore t :which-key "window"))
   (general-def
     :prefix "SPC p"
@@ -605,10 +612,7 @@ Version 2016-10-25"
 	      ("C-." . company-search-candidates)
               ("C-," . lsp-signature-activate))
   :custom
-  (lsp-enable-snippet t)
-  :config
-  (setq lsp-clients-clangd-args
-	'("--header-insertion=never")))
+  (lsp-enable-snippet t))
 
 (use-package lsp-ui
   :init
