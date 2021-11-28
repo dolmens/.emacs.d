@@ -234,8 +234,12 @@
 (use-package general
   :config
   (general-def
-    :states '(normal visual motion)
-    "C-e" 'evil-end-of-line)
+    :states '(normal visual motion insert)
+    "C-a" 'move-beginning-of-line
+    "C-e" 'move-end-of-line
+    "C-p" 'previous-line
+    "C-n" 'next-line
+    "C-k" 'kill-line)
   (general-def
     :states '(normal motion insert)
     "M-." 'xref-find-definitions)
