@@ -21,7 +21,13 @@
 (unless window-system
   (xterm-mouse-mode t))
 
-;; (setq frame-background-mode 'dark)
+;; (unless window-system
+;;   (setq frame-background-mode 'dark))
+
+(unless (display-graphic-p)
+  ;; activate mouse-based scrolling
+  (global-set-key (kbd "<mouse-4>") 'scroll-down-line)
+  (global-set-key (kbd "<mouse-5>") 'scroll-up-line))
 
 ;; show column number in modeline
 (column-number-mode)
@@ -35,6 +41,9 @@
 (setq recentf-filename-handlers
       (append '(abbreviate-file-name) recentf-filename-handlers))
 (recentf-mode 1)
+
+(require 'midnight)
+(midnight-delay-set 'midnight-delay "4:30am")
 
 ;; buffers reflect external file changes
 (global-auto-revert-mode t)
@@ -103,6 +112,7 @@
   :if window-system)
 
 (use-package doom-modeline
+  :if window-system
   :hook (after-init . doom-modeline-mode))
 
 (use-package winum
@@ -128,7 +138,7 @@
          ("C-c s" . counsel-rg)
          :map ivy-minibuffer-map
          ("RET" . ivy-alt-done)
-         ("C-j" . ivy-immediate-done))
+         ("C-l" . ivy-immediate-done))
   :hook (after-init . ivy-mode))
 
 (use-package counsel
@@ -224,6 +234,7 @@
 (use-package esh-autosuggest
   :hook (eshell-mode . esh-autosuggest-mode))
 
+
 (defun lsp-format-region-or-buffer ()
   "Format region if region activated or format the whole buffer."
   (interactive)
@@ -249,9 +260,8 @@
     "C-a" 'mwim-beginning
     "C-e" 'mwim-end)
   (general-def
-    :states 'normal
-    :keymaps 'c++-mode-map
-    "gh" 'ff-find-other-file)
+    :states 'insert
+    "C-y" 'yank)
   (general-def
     :prefix "SPC"
     :states '(normal visual)
@@ -259,6 +269,9 @@
     "SPC" 'counsel-M-x
     "f" 'counsel-find-file
     "b" 'ivy-switch-buffer
+    "e" 'eshell
+    "t" 'lsp-treemacs-type-hierarchy
+    "o" 'ff-get-other-file
     "s" 'counsel-rg
     "c" '(:ignore t :which-key "code")
     "p" '(:ignore t :which-key "project")
@@ -598,6 +611,9 @@ Version 2016-10-25"
   :group 'lsp
   :type '(repeat directory))
 
+(use-package f :defer nil)
+(require 'f)
+
 (defun filtered/lsp ()
   (when (or (not filter-lsp-directories)
             (and (buffer-file-name)
@@ -676,6 +692,17 @@ Version 2016-10-25"
          ("\\.md\\'" . markdown-mode)
          ("\\.markdown\\'" . markdown-mode))
   :init (setq markdown-command "multimarkdown"))
+
+(defun eshell-clear-buffer ()
+  "Clear terminal"
+  (interactive)
+  (let ((inhibit-read-only t))
+    (erase-buffer)
+    (eshell-send-input)))
+
+(add-hook 'eshell-mode-hook
+          '(lambda()
+             (local-set-key (kbd "C-l") 'eshell-clear-buffer)))
 
 ;;; mac double finger
 (defvar my-previous-buffer-last-time
