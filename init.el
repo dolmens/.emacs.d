@@ -250,7 +250,8 @@
     "C-e" 'move-end-of-line
     "C-p" 'previous-line
     "C-n" 'next-line
-    "C-k" 'kill-line)
+    "C-k" 'kill-line
+    "C-r" 'evil-search-backward)
   (general-def
     :states '(normal motion insert)
     "M-." 'xref-find-definitions)
@@ -366,6 +367,12 @@
           ("*Flycheck errors*" :select t :size 0.4 :align 'below)
 	  (Buffer-menu-mode :select t :size 20 :align 'below))))
 
+(unless window-system
+  (use-package xterm-color)
+  (setq compilation-environment '("TERM=xterm-256color"))
+  (defun my/advice-compilation-filter (f proc string)
+    (funcall f proc (xterm-color-filter string)))
+  (advice-add 'compilation-filter :around #'my/advice-compilation-filter))
 
 (use-package projectile
   :diminish
@@ -447,7 +454,8 @@
   :hook (after-init . global-undo-tree-mode)
   :init
   (setq undo-tree-visualizer-diff t
-	undo-tree-visualizer-timestamps t))
+	undo-tree-visualizer-timestamps t
+        undo-tree-history-directory-alist '(("." . "~/.emacs.d/undo"))))
 
 
 (when (string-equal system-type "darwin")
