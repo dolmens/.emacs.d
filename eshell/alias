@@ -1,4 +1,5 @@
-alias lltr ls -ltr $*
-alias llt ls -lt $*
 alias ll ls -l $*
+alias lt ls -lt $*
+alias ltr ls -ltr $*
 alias la ls -la $*
+alias vi for i in ${eshell-flatten-list $*} {find-file $i}
