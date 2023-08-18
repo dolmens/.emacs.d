@@ -116,6 +116,12 @@
   :init
   (vertico-mode))
 
+(use-package hl-line
+  :ensure nil
+  :hook ((after-init . global-hl-line-mode)
+	 ((dashboard-mode eshell-mode shell-mode term-mode vterm-mode) .
+	  (lambda () (setq-local global-hl-line-mode nil)))))
+
 (use-package marginalia
   :hook (after-init . marginalia-mode))
 
@@ -135,7 +141,11 @@
   :config
   (setq consult-narrow-key "<"))
 
-(use-package embark)
+(use-package embark
+  :bind
+  (("C-." . embark-act)
+   ("C-;" . embark-dwim)
+   ("C-h B" . embark-bindings)))
 
 (use-package embark-consult)
 
@@ -150,6 +160,10 @@
   (savehist-mode))
 
 (recentf-mode)
+
+(use-package wgrep
+  :config
+  (setq wgrep-auto-save-buffer t))
 
 (use-package helpful
   :bind (([remap describe-function] . helpful-callable)
@@ -267,6 +281,9 @@ Version 2016-10-25"
         evil-undo-system 'undo-fu)
   :hook
   (after-init . evil-mode)
+  :config
+  (evil-select-search-module 'evil-search-module 'evil-search)
+  (advice-add #'evil-force-normal-state :after #'evil-ex-nohighlight)
   :custom
   (evil-symbol-word-search t))
 
@@ -274,6 +291,11 @@ Version 2016-10-25"
   :after evil
   :hook
   (evil-mode . evil-collection-init))
+
+(use-package evil-anzu
+  :after evil
+  :init
+  (global-anzu-mode))
 
 (use-package general
   :config
