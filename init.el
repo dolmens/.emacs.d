@@ -23,6 +23,9 @@
 
 (add-to-list 'default-frame-alist '(fullscreen . maximized))
 
+(setq frame-title-format '("%b – MyEmacs")
+      icon-title-format frame-title-format)
+
 (setq
  inhibit-splash-screen t
  inhibit-startup-message t
@@ -99,7 +102,12 @@
   (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
         doom-themes-enable-italic t) ; if nil, italics is universally disabled
   :init
-  (load-theme 'doom-one t))
+  (if window-system
+      (load-theme 'doom-one t)
+    (load-theme 'doom-dark+ t)))
+
+(use-package doom-modeline
+  :hook (after-init . doom-modeline-mode))
 
 (use-package minions
   :hook
@@ -107,17 +115,16 @@
 
 (column-number-mode 1)
 
-(use-package display-line-numbers
-  :ensure nil
-  :hook ((prog-mode yaml-mode conf-mode) . display-line-numbers-mode)
-  :init (setq display-line-numbers-width-start t))
+;; currently, line numbers will cause buffer move when mini buffer popuping  
+;; (use-package display-line-numbers
+;;   :hook ((prog-mode yaml-mode conf-mode) . display-line-numbers-mode)
+;;   :init (setq display-line-numbers-width-start t))
 
 (use-package vertico
   :init
   (vertico-mode))
 
 (use-package hl-line
-  :ensure nil
   :hook ((after-init . global-hl-line-mode)
 	 ((dashboard-mode eshell-mode shell-mode term-mode vterm-mode) .
 	  (lambda () (setq-local global-hl-line-mode nil)))))
@@ -178,6 +185,25 @@
          :map helpful-mode-map
          ("r"                       . remove-hook-at-point)))
 
+(use-package popper
+  :bind
+  (("C-`"   . popper-toggle-latest)
+   ("M-`"   . popper-cycle)
+   ("C-M-`" . popper-toggle-type))
+  :init
+  (setq popper-reference-buffers
+	'(help-mode
+	  helpful-mode
+	  compilation-mode))
+  :hook
+  (after-init . popper-mode)
+  (after-init . popper-echo-mode))
+
+(use-package hide-mode-line
+  :hook
+  ((help-mode helpful-mode compilation-mode special-mode)
+   . hide-mode-line-mode))
+
 (use-package ibuffer
   :bind ([remap list-buffers] . ibuffer))
 
@@ -198,6 +224,15 @@
 (use-package rg)
 
 (use-package mwim)
+
+(add-hook 'after-init-hook 'electric-pair-mode)
+(add-hook 'after-init-hook 'electric-indent-mode)
+
+(use-package rainbow-delimiters
+  :hook (prog-mode . rainbow-delimiters-mode))
+
+(setq ansi-color-for-compilation-mode 'filter)
+(add-hook 'compilation-filter-hook #'ansi-color-compilation-filter)
 
 (use-package rust-mode)
 
@@ -269,7 +304,7 @@ Version 2016-10-25"
   :diminish
   :hook
   (after-init . which-key-mode))
-  
+
 (use-package gcmh
   :diminish
   :hook
@@ -283,7 +318,6 @@ Version 2016-10-25"
   (after-init . evil-mode)
   :config
   (evil-select-search-module 'evil-search-module 'evil-search)
-  (advice-add #'evil-force-normal-state :after #'evil-ex-nohighlight)
   :custom
   (evil-symbol-word-search t))
 
@@ -294,8 +328,55 @@ Version 2016-10-25"
 
 (use-package evil-anzu
   :after evil
+  ;; dont know how to load it afterly
+  :demand t
   :init
   (global-anzu-mode))
+
+(defvar my-escape-hook nil
+  "A hook run when C-g is pressed (or ESC in normal mode, for evil users).
+
+More specifically, when `my/escape' is pressed. If any hook returns non-nil,
+all hooks after it are ignored.")
+
+(defun my/escape (&optional interactive)
+  "Run `my-escape-hook'."
+  (interactive (list 'interactive))
+  (cond ((minibuffer-window-active-p (minibuffer-window))
+         ;; quit the minibuffer if open.
+         (when interactive
+           (setq this-command 'abort-recursive-edit))
+         (abort-recursive-edit))
+        ;; Run all escape hooks. If any returns non-nil, then stop there.
+        ((run-hook-with-args-until-success 'my-escape-hook))
+        ;; don't abort macros
+        ((or defining-kbd-macro executing-kbd-macro) nil)
+        ;; Back to the default
+        ((unwind-protect (keyboard-quit)
+           (when interactive
+             (setq this-command 'keyboard-quit))))))
+
+(defun popper-quit-window-or-bury-all ()
+  (if (popper-popup-p (current-buffer))
+      (quit-window)
+    (popper--bury-all)))
+
+(defun +evil-disable-ex-highlights-h ()
+  "Disable ex search buffer highlights."
+  (when (evil-ex-hl-active-p 'evil-ex-search)
+    (evil-ex-nohighlight)
+    t))
+(add-hook 'my-escape-hook #'+evil-disable-ex-highlights-h)
+(add-hook 'my-escape-hook #'popper-quit-window-or-bury-all 'append)
+
+(defun +evil-escape-a (&rest _)
+  "Call `my/escape' if `evil-force-normal-state' is called interactively."
+  (when (called-interactively-p 'any)
+    (call-interactively #'my/escape)))
+
+(add-hook 'after-init-hook
+	  (lambda ()
+	    (advice-add #'evil-force-normal-state :after #'+evil-escape-a)))
 
 (use-package general
   :config
@@ -349,12 +430,14 @@ Version 2016-10-25"
     "j" 'projectile-compile-project
     "x" 'execute-extended-command
     "." 'find-file
-    ";" 'execute-extended-command
-    ":" 'pp-eval-expression
+    ":" 'execute-extended-command
+    ";" 'pp-eval-expression
     "/" 'consult-ripgrep
 
     "c" '(:ignore t :which-key "code")
+    "ca" 'eglot-code-actions
     "cc" 'compile
+    "cf" 'eglot-format
     "cr" 'eglot-rename
     "cx" 'consult-flymake
 
@@ -369,6 +452,7 @@ Version 2016-10-25"
     "h" '(:ignore t :which-key "helps")
     "hf" 'describe-function
     "hk" 'describe-key
+    "hm" 'describe-mode
     "hv" 'describe-variable
 
     "p" '(:ignore t :which-key "projects")
