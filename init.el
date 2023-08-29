@@ -117,8 +117,7 @@
 
 ;; currently, line numbers will cause buffer move when mini buffer popuping  
 ;; (use-package display-line-numbers
-;;   :hook ((prog-mode yaml-mode conf-mode) . display-line-numbers-mode)
-;;   :init (setq display-line-numbers-width-start t))
+;;   :hook ((prog-mode yaml-mode conf-mode) . display-line-numbers-mode))
 
 (use-package vertico
   :init
@@ -225,8 +224,9 @@
 
 (use-package mwim)
 
-(add-hook 'after-init-hook 'electric-pair-mode)
-(add-hook 'after-init-hook 'electric-indent-mode)
+
+(add-hook 'prog-mode-hook 'electric-pair-local-mode)
+(add-hook 'prog-mode-hook 'electric-indent-mode)
 
 (use-package rainbow-delimiters
   :hook (prog-mode . rainbow-delimiters-mode))
@@ -454,6 +454,14 @@ all hooks after it are ignored.")
     "hk" 'describe-key
     "hm" 'describe-mode
     "hv" 'describe-variable
+
+    "l" '(:ignore t :which-key "lsp")
+    "la" 'eglot-code-actions
+    "lc" 'eglot-hierarchy-call-hierarchy
+    "lf" 'eglot-format
+    "li" 'eglot-find-implementation
+    "lr" 'eglot-rename
+    "lt" 'eglot-hierarchy-type-hierarchy
 
     "p" '(:ignore t :which-key "projects")
     "pc" 'projectile-compile-project
