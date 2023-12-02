@@ -94,6 +94,9 @@
 (setq use-package-always-ensure t
       use-package-always-defer t)
 
+(unless (package-installed-p 'vc-use-package)
+  (package-vc-install "https://github.com/slotThe/vc-use-package"))
+
 (use-package diminish)
 
 (use-package doom-themes
@@ -115,9 +118,11 @@
 
 (column-number-mode 1)
 
-;; currently, line numbers will cause buffer move when mini buffer popuping  
-;; (use-package display-line-numbers
-;;   :hook ((prog-mode yaml-mode conf-mode) . display-line-numbers-mode))
+(use-package display-line-numbers
+  :config
+  (setq display-line-numbers-width 3
+	display-line-numbers-widen t)
+  :hook ((prog-mode text-mode conf-mode) . display-line-numbers-mode))
 
 (use-package vertico
   :init
@@ -271,6 +276,11 @@ Version 2016-10-25"
    (rust-mode . eglot-ensure)
    (go-mode . eglot-ensure)))
 
+(use-package eglot-hierarchy
+  :vc (:fetcher github :repo dolmens/eglot-hierarchy)
+  :config
+  (setq eglot-hierarchy-call-site t))
+
 (use-package magit)
 
 (use-package undo-fu
@@ -412,6 +422,11 @@ all hooks after it are ignored.")
     :states '(normal visual insert)
     "C-a" 'move-beginning-of-line
     "C-e" 'move-end-of-line)
+
+  (general-def
+    :states '(insert)
+    "C-p" 'previous-line
+    "C-n" 'next-line)
 
   (general-def
     :states '(normal visual insert)
